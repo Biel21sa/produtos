@@ -2,17 +2,17 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { ProductsService } from './product.service';
+import { ProductService } from './product.service';
 import { Product } from '../entity/Product';
 
-describe('ProductsService', () => {
-  let service: ProductsService;
+describe('ProductService', () => {
+  let service: ProductService;
   let repo: Repository<Product>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        ProductsService,
+        ProductService,
         {
           provide: getRepositoryToken(Product),
           useClass: Repository,
@@ -20,7 +20,7 @@ describe('ProductsService', () => {
       ],
     }).compile();
 
-    service = module.get<ProductsService>(ProductsService);
+    service = module.get<ProductService>(ProductService);
     repo = module.get<Repository<Product>>(getRepositoryToken(Product));
   });
 
