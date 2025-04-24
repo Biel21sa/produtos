@@ -13,4 +13,5 @@ export default new DataSource({
   database: process.env.DB_NAME,
   synchronize: true,
   entities: ['dist/**/*.entity.js'],
+  migrations: ['dist/migrations/*.js'],
 });
