@@ -11,4 +11,8 @@ export const router = createBrowserRouter([
     path: "/product/:id",
     element: <ProductForm />,
   },
+  {
+    path: "*",
+    element: <div>Página não encontrada</div>,
+  },
 ]);
