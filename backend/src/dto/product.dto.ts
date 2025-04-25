@@ -20,7 +20,7 @@ export class CreateProductDto {
   price: number;
 
   @IsUrl()
-  photo: string;
+  photo?: string;
 
   @IsArray()
   @ArrayNotEmpty()
