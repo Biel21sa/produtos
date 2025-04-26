@@ -8,16 +8,9 @@ import {
   Flex,
 } from "@chakra-ui/react";
 import { Link } from "react-router-dom";
-import useSWR, { mutate } from "swr";
-import { fetcher } from "../utils/fetcher";
-
-interface Product {
-  id: string;
-  name: string;
-  price: number;
-  qty: number;
-  photo: string;
-}
+import { removeProduct } from "../services/product/removeProduct";
+import { useProducts } from "../services/product/getProducts";
+import "../styles/ProductListScreen.scss";
 
 export const ProductListScreen: React.FC = () => {
   const [filter, setFilter] = useState("");
@@ -26,19 +19,7 @@ export const ProductListScreen: React.FC = () => {
     document.title = "Produto - Lista";
   }, []);
 
-  // Busca com SWR
-  const {
-    data: products,
-    error,
-    isLoading,
-  } = useSWR<Product[]>("http://localhost:3001/product", fetcher);
-
-  const removeProduct = async (id: string) => {
-    await fetch(`http://localhost:3001/product/${id}`, {
-      method: "DELETE",
-    });
-    mutate("http://localhost:3001/product"); // revalida a lista
-  };
+  const { data: products, error, isLoading } = useProducts();
 
   if (error) return <Box>Erro ao carregar os produtos.</Box>;
   if (isLoading) return <Box>Carregando produtos...</Box>;
@@ -49,40 +30,54 @@ export const ProductListScreen: React.FC = () => {
   );
 
   return (
-    <Box p={4}>
-      <Flex justify="space-between" align="center" mb={4}>
-        <Heading size="lg">Produtos</Heading>
-        <Link to="/product/0">
-          <Button colorScheme="green">Adicionar Produto</Button>
-        </Link>
-      </Flex>
+    <Box className="product-list" minH="100vh">
+      <Box className="product-list__header">
+        <Heading size="lg" className="product-list__title">
+          Produtos
+        </Heading>
 
-      <Input
-        placeholder="Filtrar por nome"
-        value={filter}
-        onChange={(e) => setFilter(e.target.value)}
-        mb={4}
-      />
+        <Box className="product-list__actions">
+          <Input
+            placeholder="Filtrar por nome"
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+            className="product-list__filter"
+            bg="white"
+          />
+          <Link to="/product/0">
+            <Button colorScheme="green" className="product-list__button">
+              Adicionar Produto
+            </Button>
+          </Link>
+        </Box>
+      </Box>
 
-      <SimpleGrid columns={{ base: 1, sm: 2, md: 3, lg: 4 }} gap={4}>
+      <SimpleGrid
+        columns={{ base: 1, sm: 2, md: 3, lg: 4 }}
+        gap={6}
+        className="product-list__grid"
+      >
         {filtered.map((product) => (
-          <Box
-            key={product.id}
-            borderWidth={1}
-            borderRadius="lg"
-            overflow="hidden"
-            p={4}
-          >
-            <img src={product.photo} alt={product.name} width="100%" />
-            <Heading size="md" mt={2}>
+          <Box key={product.id} className="product-card">
+            <img
+              src={product.photo}
+              alt={product.name}
+              className="product-card__image"
+            />
+            <Heading size="md" mt={2} className="product-card__name">
               {product.name}
             </Heading>
-            <p>Preço: R$ {product.price}</p>
-            <p>Quantidade: {product.qty}</p>
+            <p className="product-card__price">
+              {Number(product.price).toLocaleString("pt-BR", {
+                style: "currency",
+                currency: "BRL",
+              })}
+            </p>
+            <p className="product-card__qty">Qtd: {product.qty}</p>
 
             <Flex mt={2} gap={2}>
               <Link to={`/product/${product.id}`}>
-                <Button size="sm" colorScheme="blue">
+                <Button size="sm" colorScheme="green">
                   Editar
                 </Button>
               </Link>

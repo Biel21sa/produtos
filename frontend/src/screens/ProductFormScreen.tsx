@@ -16,6 +16,8 @@ import {
 import { useParams, useNavigate } from "react-router-dom";
 import useSWR, { mutate } from "swr";
 import { fetcher } from "../utils/fetcher";
+import { NumericFormat } from "react-number-format";
+import "../styles/ProductFormScreen.scss";
 
 export const ProductFormScreen: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -36,7 +38,6 @@ export const ProductFormScreen: React.FC = () => {
     document.title = "Produto - Formulário";
   }, []);
 
-  // Fetch categorias
   useEffect(() => {
     fetch("http://localhost:3001/category")
       .then((res) => res.json())
@@ -44,7 +45,6 @@ export const ProductFormScreen: React.FC = () => {
       .catch((err) => console.error("Erro ao carregar categorias", err));
   }, []);
 
-  // Fetch produto (modo edição)
   const { data, error } = useSWR(
     isEdit ? `http://localhost:3001/product/${id}` : null,
     fetcher
@@ -99,59 +99,99 @@ export const ProductFormScreen: React.FC = () => {
   if (isEdit && !data) return <Box>Carregando...</Box>;
 
   return (
-    <Box p={4} maxW="600px" mx="auto">
-      <Heading size="lg" mb={4}>
-        {isEdit ? "Editar Produto" : "Novo Produto"}
-      </Heading>
+    <Box
+      minH="100vh"
+      display="flex"
+      alignItems="center"
+      justifyContent="center"
+      bg="gray.50"
+    >
+      <Box
+        p={6}
+        maxW="700px"
+        w="100%"
+        bg="white"
+        borderRadius="md"
+        boxShadow="md"
+      >
+        <div className="form-header">
+          <Button
+            onClick={() => navigate("/product")}
+            colorScheme="gray"
+            variant="outline"
+            className="back-button"
+          >
+            Voltar
+          </Button>
 
-      <FormControl mb={4}>
-        <FormLabel>Nome</FormLabel>
-        <Input value={name} onChange={(e) => setName(e.target.value)} />
-      </FormControl>
+          <Heading size="lg" className="form-title">
+            {isEdit ? "Editar Produto" : "Novo Produto"}
+          </Heading>
+        </div>
 
-      <FormControl mb={4}>
-        <FormLabel>Quantidade</FormLabel>
-        <NumberInput value={qty} min={0} onChange={(_, n) => setQty(n)}>
-          <NumberInputField />
-        </NumberInput>
-      </FormControl>
+        <Stack spacing={5}>
+          <FormControl>
+            <FormLabel>Nome</FormLabel>
+            <Input value={name} onChange={(e) => setName(e.target.value)} />
+          </FormControl>
 
-      <FormControl mb={4}>
-        <FormLabel>Preço</FormLabel>
-        <NumberInput
-          value={price}
-          min={0}
-          precision={2}
-          onChange={(_, n) => setPrice(n)}
-        >
-          <NumberInputField />
-        </NumberInput>
-      </FormControl>
+          <FormControl>
+            <FormLabel>Quantidade</FormLabel>
+            <NumberInput
+              value={qty}
+              min={0}
+              onChange={(valueString) => setQty(parseNumberInput(valueString))}
+            >
+              <NumberInputField />
+            </NumberInput>
+          </FormControl>
 
-      <FormControl mb={4}>
-        <FormLabel>Foto (URL)</FormLabel>
-        <Input value={photo} onChange={(e) => setPhoto(e.target.value)} />
-      </FormControl>
+          <FormControl>
+            <FormLabel>Preço</FormLabel>
+            <NumericFormat
+              value={price}
+              thousandSeparator="."
+              decimalSeparator=","
+              decimalScale={2}
+              fixedDecimalScale
+              allowNegative={false}
+              prefix="R$ "
+              onValueChange={(values) => setPrice(values.floatValue || 0)}
+              customInput={Input}
+            />
+          </FormControl>
 
-      <FormControl mb={4}>
-        <FormLabel>Categorias</FormLabel>
-        <CheckboxGroup
-          value={categoryIds}
-          onChange={(val) => setCategoryIds(val as string[])}
-        >
-          <Stack spacing={2}>
-            {categories.map((cat) => (
-              <Checkbox key={cat.id} value={cat.id}>
-                {cat.name}
-              </Checkbox>
-            ))}
-          </Stack>
-        </CheckboxGroup>
-      </FormControl>
+          <FormControl>
+            <FormLabel>Foto (URL)</FormLabel>
+            <Input value={photo} onChange={(e) => setPhoto(e.target.value)} />
+          </FormControl>
 
-      <Button colorScheme="green" onClick={handleSubmit}>
-        {isEdit ? "Atualizar" : "Criar"} Produto
-      </Button>
+          <FormControl>
+            <FormLabel>Categorias</FormLabel>
+            <CheckboxGroup
+              value={categoryIds}
+              onChange={(val) => setCategoryIds(val as string[])}
+            >
+              <Stack spacing={2}>
+                {categories.map((cat) => (
+                  <Checkbox key={cat.id} value={cat.id}>
+                    {cat.name}
+                  </Checkbox>
+                ))}
+              </Stack>
+            </CheckboxGroup>
+          </FormControl>
+
+          <Button colorScheme="green" onClick={handleSubmit} size="lg">
+            {isEdit ? "Atualizar" : "Criar"} Produto
+          </Button>
+        </Stack>
+      </Box>
     </Box>
   );
+};
+
+const parseNumberInput = (value: string) => {
+  const parsed = Number(value);
+  return isNaN(parsed) ? 0 : parsed;
 };

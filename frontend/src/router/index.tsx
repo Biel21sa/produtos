@@ -1,8 +1,12 @@
-import { createBrowserRouter } from "react-router-dom";
+import { createBrowserRouter, Navigate } from "react-router-dom";
 import ProductList from "../pages/ProductList";
 import ProductForm from "../pages/ProductForm";
 
 export const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <Navigate to="/product" />,
+  },
   {
     path: "/product",
     element: <ProductList />,
