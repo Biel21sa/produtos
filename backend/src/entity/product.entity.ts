@@ -22,7 +22,7 @@ export class Product {
   price: number;
 
   @Column()
-  photo: string;
+  photo?: string;
 
   @ManyToMany(() => Category)
   @JoinTable()
